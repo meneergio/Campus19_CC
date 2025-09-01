@@ -6,7 +6,7 @@
 /*   By: gwindey <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 16:37:53 by gwindey           #+#    #+#             */
-/*   Updated: 2025/08/04 15:36:26 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/09/01 17:38:40 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,9 +77,9 @@ int	main(int argc, char **argv)
 	setup_game_elements(&game);
 	mlx_key_hook(game.win, handle_keypress, &game);
 	mlx_hook(game.win, 17, 0, close_window, &game);
-	printf("🎮 So Long started!\n");
+	printf("😺 So Long started!\n");
 	printf("Use WASD or arrow keys to move\n");
-	printf("Collect all %d items and reach the exit!\n",
+	printf("Collect all %d 🍣 and reach the 📦!\n",
 		game.collectibles_total);
 	mlx_loop(game.mlx);
 	return (0);
