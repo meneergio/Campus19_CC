@@ -6,7 +6,7 @@
 /*   By: gwindey <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 16:37:53 by gwindey           #+#    #+#             */
-/*   Updated: 2025/09/01 17:38:40 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/09/08 16:37:51 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,11 +46,7 @@ static void	validate_and_parse_map(char *filename, t_game *game)
 		free_map(game->map);
 		error_exit(ERR_MAP_TOO_LARGE);
 	}
-	if (!validate_map(game))
-	{
-		free_map(game->map);
-		error_exit(ERR_MAP_INVALID);
-	}
+	validate_map(game);
 }
 
 static void	setup_game_elements(t_game *game)

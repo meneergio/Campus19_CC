@@ -6,7 +6,7 @@
 /*   By: gwindey <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 14:51:19 by gwindey           #+#    #+#             */
-/*   Updated: 2025/08/04 17:35:23 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/09/08 16:18:04 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,8 @@ static void	flood_fill(char **map_copy, t_point pos, t_game *game)
 		return ;
 	if (pos.y < 0 || pos.y >= game->map_height)
 		return ;
-	if (map_copy[pos.y][pos.x] == WALL || map_copy[pos.y][pos.x] == 'V')
+	if (map_copy[pos.y][pos.x] == WALL || map_copy[pos.y][pos.x] == 'V'
+		|| map_copy[pos.y][pos.x] == EXIT)
 		return ;
 	map_copy[pos.y][pos.x] = 'V';
 	flood_fill(map_copy, (t_point){pos.x + 1, pos.y}, game);
@@ -71,6 +72,5 @@ int	check_valid_path(t_game *game)
 	flood_fill(map_copy, val.player_pos, game);
 	count_reachable_items(game, map_copy, &val);
 	free_map(map_copy);
-	return (val.collectibles_reachable == val.total_collectibles
-		&& val.exit_reachable);
+	return (val.collectibles_reachable == val.total_collectibles);
 }
