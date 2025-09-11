@@ -6,7 +6,7 @@
 /*   By: gwindey <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 12:34:08 by gwindey           #+#    #+#             */
-/*   Updated: 2025/06/20 11:33:23 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/09/09 15:37:45 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,10 @@ void	index_stack(t_node *stack)
 	size = stack_size(stack);
 	array = malloc(sizeof(int) * size);
 	if (!array)
-		return ;
+	{
+		write(2, "Error\n", 6);
+		exit(1);
+	}
 	copy_stack_to_array(stack, array);
 	sort_array(array, size);
 	current = stack;

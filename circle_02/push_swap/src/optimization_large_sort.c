@@ -6,17 +6,21 @@
 /*   By: gwindey <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 17:57:08 by gwindey           #+#    #+#             */
-/*   Updated: 2025/06/24 17:57:23 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/09/10 12:14:13 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
+#include <stdio.h>
 
 static void	finalize_stack_a(t_node **a)
 {
-	if (stack_size(*a) == 3)
+	int	size;
+
+	size = stack_size(*a);
+	if (size == 3)
 		sort_three(a);
-	else if (stack_size(*a) == 2 && (*a)->index > (*a)->next->index)
+	else if (size == 2 && (*a)->index > (*a)->next->index)
 		sa(a);
 }
 
@@ -27,7 +31,7 @@ static void	process_chunk(t_node **a, t_node **b, int min_range, int max_range)
 	int	mid_point;
 
 	elements_in_chunk = count_elements_in_chunk(*a, min_range, max_range);
-	while (elements_in_chunk > 0 && stack_size(*a) > 3)
+	while (elements_in_chunk > 0)
 	{
 		best_pos = find_most_efficient_element(*a, min_range, max_range);
 		if (best_pos == -1)
@@ -73,7 +77,15 @@ void	optimized_chunk_sort(t_node **a, t_node **b)
 	int	size;
 
 	size = stack_size(*a);
-	if (size <= 3)
+	if (size <= 1)
+		return ;
+	else if (size == 2)
+	{
+		if ((*a)->index > (*a)->next->index)
+			sa(a);
+		return ;
+	}
+	else if (size == 3)
 	{
 		sort_three(a);
 		return ;

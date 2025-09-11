@@ -6,7 +6,7 @@
 /*   By: gwindey <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 16:04:15 by gwindey           #+#    #+#             */
-/*   Updated: 2025/06/20 10:25:47 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/09/09 15:37:16 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,22 +51,27 @@ static void	free_split(char **arr)
 	free(arr);
 }
 
-static void	process_args(t_node **stack, char **args)
+static int	process_args(t_node **stack, char **args)
 {
 	long	val;
 	int		i;
+	t_node	*new;
 
 	i = 0;
 	while (args[i])
 	{
 		if (!is_number(args[i]))
-			error_exit(stack);
+			return (0);
 		val = ft_atol(args[i]);
 		if (val < INT_MIN || val > INT_MAX || is_duplicate(*stack, val))
-			error_exit(stack);
-		stack_add_back(stack, new_node(val));
+			return (0);
+		new = new_node(val);
+		if (!new)
+			return (0);
+		stack_add_back(stack, new);
 		i++;
 	}
+	return (1);
 }
 
 void	parse_input(t_node **stack, int argc, char **argv)
@@ -78,9 +83,16 @@ void	parse_input(t_node **stack, int argc, char **argv)
 		args = ft_split(argv[1], ' ');
 		if (!args)
 			error_exit(stack);
-		process_args(stack, args);
+		if (!process_args(stack, args))
+		{
+			free_split(args);
+			error_exit(stack);
+		}
 		free_split(args);
 	}
 	else
-		process_args(stack, argv + 1);
+	{
+		if (!process_args(stack, argv + 1))
+			error_exit(stack);
+	}
 }

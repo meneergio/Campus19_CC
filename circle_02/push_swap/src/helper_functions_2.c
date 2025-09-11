@@ -6,7 +6,7 @@
 /*   By: gwindey <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 17:07:00 by gwindey           #+#    #+#             */
-/*   Updated: 2025/06/24 17:11:49 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/09/10 12:00:28 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,9 @@ void	rotate_to_position(t_node **stack, int target_pos, char stack_name)
 	int	size;
 
 	size = stack_size(*stack);
-	if (target_pos <= 0)
+	if (target_pos < 0)
+		return ;
+	if (target_pos == 0)
 		return ;
 	if (target_pos <= size / 2)
 		rotate_forward(stack, target_pos, stack_name);

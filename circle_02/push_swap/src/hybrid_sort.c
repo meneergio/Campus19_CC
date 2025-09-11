@@ -6,7 +6,7 @@
 /*   By: gwindey <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 17:58:26 by gwindey           #+#    #+#             */
-/*   Updated: 2025/08/01 13:32:45 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/09/10 12:01:05 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,14 @@ void	hybrid_sort(t_node **a, t_node **b, int size)
 {
 	if (stack_is_sorted(*a))
 		return ;
-	if (size <= 5)
+	if (size <= 1)
+		return ;
+	else if (size == 2)
+	{
+		if ((*a)->index > (*a)->next->index)
+			sa(a);
+	}
+	else if (size <= 5)
 		sort_five(a, b);
 	else if (size <= 100)
 		optimized_chunk_sort(a, b);

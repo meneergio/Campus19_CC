@@ -6,7 +6,7 @@
 #    By: gwindey <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/20 09:57:31 by gwindey           #+#    #+#              #
-#    Updated: 2025/06/24 18:17:17 by gwindey          ###   ########.fr        #
+#    Updated: 2025/09/09 14:57:29 by gwindey          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,7 +21,8 @@ SRCS		= src/main.c src/parser.c src/sorting_algorithms.c \
 			  src/rotate.c src/reverse_rotate.c src/stack.c \
 			  src/index_stack.c src/helper_functions_2.c \
 			  src/optimization_large_sort.c src/push_back_optimized.c \
-			  src/operations_2.c src/hybrid_sort.c
+			  src/operations_2.c src/hybrid_sort.c \
+			  src/sorting_algorithms_extra.c
 
 OBJS		= $(SRCS:.c=.o)
 
