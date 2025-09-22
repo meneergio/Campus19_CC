@@ -6,7 +6,7 @@
 /*   By: gwindey <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/01 17:01:54 by gwindey           #+#    #+#             */
-/*   Updated: 2025/09/03 14:36:55 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/09/08 15:42:02 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,6 +133,8 @@ int		check_valid_path(t_game *game);
 /* Map utility functions (from map_validation_utils.c) */
 char	**copy_map(t_game *game);
 void	count_reachable_items(t_game *game, char **map_copy, t_validation *val);
+void	count_reachable_items_separate(t_game *game, char **collectible_map,
+			char **exit_map, t_validation *val);
 
 /* Game logic functions */
 int		can_move_to(t_game *game, int x, int y);

@@ -6,7 +6,7 @@
 /*   By: gwindey <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 17:26:30 by gwindey           #+#    #+#             */
-/*   Updated: 2025/08/04 17:47:11 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/09/08 15:33:33 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,31 @@ void	count_reachable_items(t_game *game, char **map_copy, t_validation *val)
 				val->collectibles_reachable++;
 			else if (game->map[pos.y][pos.x] == EXIT
 				&& map_copy[pos.y][pos.x] == 'V')
+				val->exit_reachable = 1;
+			pos.x++;
+		}
+		pos.y++;
+	}
+}
+
+void	count_reachable_items_separate(t_game *game, char **collectible_map,
+	char **exit_map, t_validation *val)
+{
+	t_point	pos;
+
+	val->collectibles_reachable = 0;
+	val->exit_reachable = 0;
+	pos.y = 0;
+	while (pos.y < game->map_height)
+	{
+		pos.x = 0;
+		while (pos.x < game->map_width)
+		{
+			if (game->map[pos.y][pos.x] == COLLECTIBLE
+				&& collectible_map[pos.y][pos.x] == 'V')
+				val->collectibles_reachable++;
+			else if (game->map[pos.y][pos.x] == EXIT
+				&& exit_map[pos.y][pos.x] == 'V')
 				val->exit_reachable = 1;
 			pos.x++;
 		}
