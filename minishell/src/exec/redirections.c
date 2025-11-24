@@ -3,73 +3,81 @@
 /*                                                        :::      ::::::::   */
 /*   redirections.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gwindey <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/10 17:48:21 by gwindey           #+#    #+#             */
-/*   Updated: 2025/11/17 14:03:53 by gwindey          ###   ########.fr       */
+/*   Created: 2025/11/17 20:31:08 by dzotti            #+#    #+#             */
+/*   Updated: 2025/11/17 20:31:08 by dzotti           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include "libft.h"
 
-// FIX: Veilige, custom foutmelding die direct de verwachte fout schrijft
-static int	redir_error(char *arg)
+// Print een redirect-foutboodschap en geef -1 terug
+static int	redir_error(char *arg, char *msg)
 {
-    // FIX: Gebruik ft_putstr_fd om de volledige Bash-stijl foutmelding te garanderen
-    // De garbled output vereist dat we de foutboodschap op een stabiele manier schrijven.
 	ft_putstr_fd("minishell: ", 2);
 	ft_putstr_fd(arg, 2);
 	ft_putstr_fd(": ", 2);
-	ft_putstr_fd(strerror(errno), 2);
+	ft_putstr_fd(msg, 2);
 	ft_putstr_fd("\n", 2);
 	return (-1);
 }
 
-int apply_redirs(t_redir *redirs)
+// Handelt R_IN, R_OUT en R_APPEND af voor één redirect-node
+static int	handle_file_redir(t_redir *r)
 {
-    int fd;
-    t_redir *r = redirs;
+	int	fd;
 
-    while (r)
-    {
-        if (r->type == R_IN)
-        {
-            fd = open(r->arg, O_RDONLY);
-            // ⚠️ FIX: Vervang 'perror(r->arg); return (-1);' door de custom functie
-            if (fd < 0) {
-                return (redir_error(r->arg));
-            }
-            dup2(fd, STDIN_FILENO);
-            close(fd);
-        }
-        else if (r->type == R_OUT)
-        {
-            fd = open(r->arg, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-             // ⚠️ FIX: Vervang 'perror(r->arg); return (-1);'
-            if (fd < 0) {
-                return (redir_error(r->arg));
-            }
-            dup2(fd, STDOUT_FILENO);
-            close(fd);
-        }
-        else if (r->type == R_APPEND)
-        {
-            fd = open(r->arg, O_WRONLY | O_CREAT | O_APPEND, 0644);
-             // ⚠️ FIX: Vervang 'perror(r->arg); return (-1);'
-            if (fd < 0) {
-                return (redir_error(r->arg));
-            }
-            dup2(fd, STDOUT_FILENO);
-            close(fd);
-        }
-        else if (r->type == R_HEREDOC && r->hdoc_fd >= 0)
-        {
-            dup2(r->hdoc_fd, STDIN_FILENO);
-            close(r->hdoc_fd);
-        }
+	fd = -1;
+	if (r->type == R_IN)
+		fd = open(r->arg, O_RDONLY);
+	else if (r->type == R_OUT)
+		fd = open(r->arg, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	else if (r->type == R_APPEND)
+		fd = open(r->arg, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	if (fd < 0)
+	{
+		if (r->type == R_IN)
+			return (redir_error(r->arg, "No such file or directory"));
+		return (redir_error(r->arg, "Permission denied"));
+	}
+	if (r->type == R_IN)
+		dup2(fd, STDIN_FILENO);
+	else
+		dup2(fd, STDOUT_FILENO);
+	close(fd);
+	return (0);
+}
 
-        r = r->next;
-    }
-    return (0);
+// Handelt een heredoc-redirect af (fd naar stdin dupen)
+static int	handle_heredoc_redir(t_redir *r)
+{
+	if (r->type == R_HEREDOC && r->hdoc_fd >= 0)
+	{
+		dup2(r->hdoc_fd, STDIN_FILENO);
+		close(r->hdoc_fd);
+	}
+	return (0);
+}
+
+// Loopt over alle redirects en past ze in volgorde toe
+int	apply_redirs(t_redir *redirs)
+{
+	t_redir	*r;
+	int		res;
+
+	r = redirs;
+	while (r)
+	{
+		res = 0;
+		if (r->type == R_IN || r->type == R_OUT || r->type == R_APPEND)
+			res = handle_file_redir(r);
+		else if (r->type == R_HEREDOC)
+			res = handle_heredoc_redir(r);
+		if (res != 0)
+			return (-1);
+		r = r->next;
+	}
+	return (0);
 }

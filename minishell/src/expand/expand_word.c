@@ -5,15 +5,15 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/01 15:51:34 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/12 17:32:14 by gwindey          ###   ########.fr       */
+/*   Created: 2025/11/21 21:29:57 by dzotti            #+#    #+#             */
+/*   Updated: 2025/11/21 21:29:57 by dzotti           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include "libft.h"
 
-// maak kopie van s[0..end-1]
+// kopie van s[0..end-1]
 static char	*dup_prefix(const char *s, int end)
 {
 	char	*out;
@@ -26,7 +26,7 @@ static char	*dup_prefix(const char *s, int end)
 	return (out);
 }
 
-// maak kopie van s vanaf start
+// kopie van s vanaf index start
 static char	*dup_suffix(const char *s, int start)
 {
 	size_t	len;
@@ -63,9 +63,7 @@ static char	*join_three(char *a, char *b, char *c)
 	return (res);
 }
 
-// doe in 1 string: ..$VAR.. -> ..VALUE.. : before + value + after
-// Note: expand_find_dollar now only returns $ positions that are followed
-// by valid variable names, so we don't need extra checks here
+// in één woord: ..$VAR.. -> ..VALUE.. (before + value + after)
 char	*expand_word_once(const char *s, t_env_entry *env)
 {
 	t_expword	e;
@@ -89,7 +87,7 @@ char	*expand_word_once(const char *s, t_env_entry *env)
 	return (join_three(e.before, e.value, e.after));
 }
 
-// herhaal tot er geen $ meer staat
+// herhaal tot er geen $ meer is
 char	*expand_word_all(const char *s, t_env_entry *env)
 {
 	char	*current;

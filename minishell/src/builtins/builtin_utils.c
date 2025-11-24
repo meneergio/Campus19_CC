@@ -51,6 +51,6 @@ int	run_builtin(char **argv, t_env_entry **env, int last_status)
 	if (ft_strncmp(argv[0], "unset", 6) == 0)
 		return (builtin_unset(argv, env));
 	if (ft_strncmp(argv[0], "exit", 5) == 0)
-    return (builtin_exit(argv, last_status, *env));
+		return (builtin_exit(argv, last_status, *env));
 	return (1);
 }

@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "minishell.h"
+#include "libft.h"
 
 // maak 1 commando-node rond een tokenlijst
 static t_commando	*parser_cmd_new(t_token *start)
@@ -65,12 +66,7 @@ static t_token	*parser_pipe_hit(t_commando **head, t_commando **tail,
 	next = pipe->next;
 	prev = find_prev(*start, pipe);
 	if (!prev)
-	{
-		if (pipe->value)
-			free(pipe->value);
-		free(pipe);
 		return (NULL);
-	}
 	prev->next = NULL;
 	if (!parser_add_cmd(head, tail, *start))
 	{
@@ -104,12 +100,14 @@ t_commando	*parser_split_pipes(t_token *tok)
 		{
 			current = parser_pipe_hit(&head, &tail, &start, current);
 			if (!current)
-				return (parser_free_cmds(head), NULL);
+				return (NULL);
 		}
 		else
 			current = current->next;
 	}
-	if (start && !parser_add_cmd(&head, &tail, start))
+	if (!start)
+		return (NULL);
+	if (!parser_add_cmd(&head, &tail, start))
 		return (parser_free_cmds(head), NULL);
 	return (head);
 }

@@ -22,12 +22,8 @@ static void	free_redir_list(t_redir *r)
 		next = r->next;
 		if (r->arg)
 			free(r->arg);
-		
-		// 🚨 ALLEEN SLUITEN ALS HET EEN HEREDOC IS (r->type == R_HDOC) 
-		// EN DE FD GELDIG IS
 		if (r->type == R_HEREDOC && r->hdoc_fd >= 0)
 			close(r->hdoc_fd);
-		
 		free(r);
 		r = next;
 	}

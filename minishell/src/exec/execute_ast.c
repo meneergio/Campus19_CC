@@ -1,26 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser_free_cmds.c                                 :+:      :+:    :+:   */
+/*   execute_ast.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/02 00:43:09 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/19 17:10:35 by gwindey          ###   ########.fr       */
+/*   Created: 2025/11/17 19:56:53 by dzotti            #+#    #+#             */
+/*   Updated: 2025/11/17 19:56:53 by dzotti           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	parser_free_cmds(t_commando *cmd)
+// Dispatcher: kiest single of pipeline afhankelijk van aantal cmd's
+int	execute_ast(t_ast *ast, t_env_entry **env, int *last_status)
 {
-	t_commando	*next;
-
-	while (cmd)
-	{
-		next = cmd->next;
-		token_list_free(cmd->tokens);
-		free(cmd);
-		cmd = next;
-	}
+	if (!ast || ast->ncmd == 0)
+		return (1);
+	if (ast->ncmd == 1)
+		return (execute_single(ast, env, last_status));
+	return (execute_pipeline(ast, env, last_status));
 }

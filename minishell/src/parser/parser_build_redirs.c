@@ -23,7 +23,7 @@ static t_redir	*redir_new(t_rtype type, char *arg_owned)
 	node->type = type;
 	node->arg = arg_owned;
 	node->next = NULL;
-	node->hdoc_fd = -1; // <-- Handmatige initialisatie na malloc
+	node->hdoc_fd = -1;
 	return (node);
 }
 

@@ -24,7 +24,6 @@ static int	count_argv_words(t_token *t)
 	{
 		if (pending == -1 && t->type == TOK_WORD)
 		{
-			// Skip lege values van $EMPTY expansion
 			if (t->value && t->value[0] != '\0')
 				count++;
 		}
@@ -52,7 +51,7 @@ static int	validate_one_cmd(t_token *t)
 	while (t && t->type != TOK_PIPE)
 	{
 		if (pending == -1 && t->type == TOK_WORD)
-			;  // OK
+			;
 		else if (pending != -1 && t->type == TOK_WORD)
 			pending = -1;
 		else if (t->type == TOK_REDIR_IN)
@@ -65,7 +64,7 @@ static int	validate_one_cmd(t_token *t)
 			pending = R_HEREDOC;
 		t = t->next;
 	}
-	if (pending != -1)  // Alleen check pending, niet argc
+	if (pending != -1)
 		return (0);
 	return (1);
 }
@@ -82,7 +81,6 @@ static int	fill_argv_words(t_token *t, char **argv_array)
 	{
 		if (pending == -1 && t->type == TOK_WORD)
 		{
-			// Skip lege values
 			if (t->value && t->value[0] != '\0')
 			{
 				argv_array[i] = t->value;

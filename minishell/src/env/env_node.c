@@ -6,26 +6,21 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 15:37:46 by dzotti            #+#    #+#             */
-/*   Updated: 2025/10/17 15:37:46 by dzotti           ###   ########.fr       */
+/*   Updated: 2025/11/18 15:40:26 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include "libft.h"
 
+// Als s NULL is, retourneer NULL.
 static char	*dup_str(const char *s)
 {
 	size_t	len;
 	char	*out;
 
 	if (s == NULL)
-	{
-		out = (char *)malloc(1);
-		if (!out)
-			return (NULL);
-		out[0] = '\0';
-		return (out);
-	}
+		return (NULL);
 	len = ft_strlen(s);
 	out = (char *)malloc(len + 1);
 	if (!out)
@@ -48,7 +43,7 @@ t_env_entry	*env_new_node(const char *key, const char *value)
 	if (!node->key)
 		return (free(node), NULL);
 	node->value = dup_str(value);
-	if (!node->value)
+	if (value != NULL && node->value == NULL)
 	{
 		free(node->key);
 		free(node);

@@ -5,96 +5,88 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/09 22:34:52 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/12 21:12:15 by gwindey          ###   ########.fr       */
+/*   Created: 2025/11/19 14:41:07 by dzotti            #+#    #+#             */
+/*   Updated: 2025/11/21 15:48:48 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include "libft.h"
 
-// helper functie om de input voor 1 heredoc te lezen
-static int	read_heredoc_input(const char *delimiter, int hdoc_fd_write, 
-                                t_env_entry *env)
+// wacht op heredoc-proces en handelt opruimen/status af
+static int	heredoc_wait_and_cleanup(pid_t pid, int read_fd, t_redir *r)
 {
-	char	*line;
-	char	*expanded;
-	size_t	delim_len;
+	int	status;
 
-	delim_len = ft_strlen(delimiter);
-	while (1)
+	signal(SIGINT, SIG_IGN);
+	waitpid(pid, &status, 0);
+	terminal_restore_control_chars();
+	tcflush(STDIN_FILENO, TCIFLUSH);
+	setup_prompt_signal_handlers();
+	if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT)
 	{
-		line = readline("> ");
-
-		// 1. EOF (Ctrl+D) of fout gedetecteerd
-		if (!line)
-			return (0);
-
-		// 2. Delimiter gevonden: Stop met lezen
-		if (ft_strncmp(line, delimiter, delim_len) == 0 && line[delim_len] == '\0')
-		{
-			free(line);
-			return (0);
-		}
-
-		// 3. EXPAND VARIABLES in de regel
-		expanded = expand_word_all(line, env);
-		free(line);
-		
-		// 4. Schrijf de ge-expanded regel naar de pipe
-		if (expanded)
-		{
-			write(hdoc_fd_write, expanded, ft_strlen(expanded));
-			write(hdoc_fd_write, "\n", 1);
-			free(expanded);
-		}
-		else
-		{
-			write(hdoc_fd_write, "\n", 1);
-		}
+		write(STDERR_FILENO, "\n", 1);
+		close(read_fd);
+		r->hdoc_fd = -1;
+		g_exit_status = 130;
+		return (0);
 	}
+	r->hdoc_fd = read_fd;
+	return (1);
+}
+
+// Logica voor het kindproces dat de heredoc-input leest
+static void	heredoc_child_process(int fds0, int fds1,
+	t_redir *r, t_env_entry *env)
+{
+	close(fds0);
+	signal(SIGINT, SIG_DFL);
+	signal(SIGQUIT, SIG_IGN);
+	read_heredoc_input(r->arg, fds1, env);
+	close(fds1);
+	exit(0);
+}
+
+// maak pipe en vul hdoc_fd voor 1 heredoc-redir
+int	handle_one_heredoc(t_redir *r, t_env_entry *env)
+{
+	int		fds[2];
+	pid_t	pid;
+
+	if (pipe(fds) < 0)
+	{
+		perror("minishell: pipe failed");
+		return (0);
+	}
+	pid = fork();
+	if (pid < 0)
+	{
+		perror("minishell: fork failed");
+		close(fds[0]);
+		close(fds[1]);
+		return (0);
+	}
+	if (pid == 0)
+		heredoc_child_process(fds[0], fds[1], r, env);
+	close(fds[1]);
+	return (heredoc_wait_and_cleanup(pid, fds[0], r));
 }
 
 // prepare heredocs voor alle commands in de AST
 int	prepare_heredocs(t_ast *ast, t_env_entry *env, int last_status)
 {
-	int		i;
-	t_redir	*r;
-	int		pipe_fds[2];
+	int	i;
 
-	(void)last_status;  // Niet nodig voor nu
+	(void)last_status;
 	if (!ast || !ast->cmdv)
 		return (1);
 	i = 0;
 	while (i < ast->ncmd)
 	{
-		r = ast->cmdv[i].redirs;
-		while (r)
+		if (!prepare_heredocs_one_cmd(ast->cmdv[i].redirs, env))
 		{
-			if (r->type == R_HEREDOC)
-			{
-				// 1. Maak een pipe aan
-				if (pipe(pipe_fds) < 0)
-				{
-					perror("minishell: pipe failed");
-					return (0);
-				}
-
-				r->hdoc_fd = pipe_fds[0];
-
-				// 2. Lees de input EN EXPAND VARIABLES
-				if (read_heredoc_input(r->arg, pipe_fds[1], env) != 0)
-				{
-					close(pipe_fds[0]);
-					close(pipe_fds[1]);
-					r->hdoc_fd = -1;
-					return (0);
-				}
-
-				// 3. Sluit schrijf-zijde
-				close(pipe_fds[1]);
-			}
-			r = r->next;
+			cleanup_opened_heredocs(ast, i);
+			return (0);
 		}
 		i++;
 	}

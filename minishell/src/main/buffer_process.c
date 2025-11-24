@@ -1,26 +1,38 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser_free_cmds.c                                 :+:      :+:    :+:   */
+/*   buffer_process.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/02 00:43:09 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/19 17:10:35 by gwindey          ###   ########.fr       */
+/*   Created: 2025/11/17 20:47:57 by dzotti            #+#    #+#             */
+/*   Updated: 2025/11/17 20:47:57 by dzotti           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	parser_free_cmds(t_commando *cmd)
+// Splits buffer op '\n' en verwerkt elke subregel
+void	process_buffer(char *buf, t_env_entry **env_head, int *last_status)
 {
-	t_commando	*next;
+	char	*p;
+	char	*start;
 
-	while (cmd)
+	if (!buf || !*buf)
+		return ;
+	start = buf;
+	p = buf;
+	while (*p)
 	{
-		next = cmd->next;
-		token_list_free(cmd->tokens);
-		free(cmd);
-		cmd = next;
+		if (*p == '\n')
+		{
+			*p = '\0';
+			if (*start)
+				process_one_line(start, env_head, last_status);
+			start = p + 1;
+		}
+		p++;
 	}
+	if (*start)
+		process_one_line(start, env_head, last_status);
 }

@@ -1,50 +1,47 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser_utils.c                                     :+:      :+:    :+:   */
+/*   parser_pipe_utils.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/20 15:11:50 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/21 16:49:07 by gwindey          ###   ########.fr       */
+/*   Created: 2025/11/21 21:01:01 by dzotti            #+#    #+#             */
+/*   Updated: 2025/11/21 21:01:01 by dzotti           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include "libft.h"
 
-// is dit een redirect-token?
-static int	is_redir_token(t_token *t)
+// helper: is dit een pipe-token?
+static int	is_pipe_token(t_token *t)
 {
 	if (!t)
 		return (0);
-	if (t->type == TOK_REDIR_IN)
-		return (1);
-	if (t->type == TOK_REDIR_OUT)
-		return (1);
-	if (t->type == TOK_HEREDOC)
-		return (1);
-	if (t->type == TOK_APPEND)
-		return (1);
-	return (0);
+	return (t->type == TOK_PIPE);
 }
 
-// check voor dingen als: "ls >", "cat <", "echo hi >"
+// check dingen als: "| ls", "ls |", "cmd1 || cmd2"
 // return 1 = ok, 0 = syntax error
-int	parser_check_redir_syntax(t_token *tok)
+int	parser_check_pipe_syntax(t_token *tok)
 {
 	t_token	*cur;
 
+	if (!tok)
+		return (1);
+	if (is_pipe_token(tok))
+	{
+		ft_putstr_fd("minishell: syntax error near pipe\n", 2);
+		return (0);
+	}
 	cur = tok;
 	while (cur)
 	{
-		if (is_redir_token(cur))
+		if (is_pipe_token(cur)
+			&& (!cur->next || is_pipe_token(cur->next)))
 		{
-			if (!cur->next || cur->next->type != TOK_WORD)
-			{
-				ft_putstr_fd("minishell: syntax error near redirection\n", 2);
-				return (0);
-			}
+			ft_putstr_fd("minishell: syntax error near pipe\n", 2);
+			return (0);
 		}
 		cur = cur->next;
 	}
