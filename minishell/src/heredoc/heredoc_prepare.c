@@ -6,7 +6,7 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 14:41:07 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/21 15:48:48 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/25 14:30:11 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,11 +35,26 @@ static int	heredoc_wait_and_cleanup(pid_t pid, int read_fd, t_redir *r)
 	return (1);
 }
 
+// Sluit alle geërfde file descriptors behalve de pipe write-end
+static void	close_inherited_fds(int keep_fd)
+{
+	int	fd;
+
+	fd = 3;
+	while (fd < 256)
+	{
+		if (fd != keep_fd)
+			close(fd);
+		fd++;
+	}
+}
+
 // Logica voor het kindproces dat de heredoc-input leest
 static void	heredoc_child_process(int fds0, int fds1,
 	t_redir *r, t_env_entry *env)
 {
 	close(fds0);
+	close_inherited_fds(fds1);
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_IGN);
 	read_heredoc_input(r->arg, fds1, env);

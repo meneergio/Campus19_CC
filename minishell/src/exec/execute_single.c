@@ -6,7 +6,7 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 19:55:07 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/19 17:40:27 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/25 14:46:01 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,10 @@ static int	exec_single_external(t_ast *ast, t_env_entry **env,
 		signal(SIGINT, SIG_DFL);
 		signal(SIGQUIT, SIG_DFL);
 		if (apply_redirs(ast->cmdv[0].redirs) == 0)
+		{
+			close_all_heredoc_fds(ast);
 			execute_external_cmd(&ast->cmdv[0], env);
+		}
 		exit(1);
 	}
 	waitpid(pid, &status, 0);

@@ -6,7 +6,7 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 20:05:19 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/17 20:05:19 by dzotti           ###   ########.fr       */
+/*   Updated: 2025/11/25 15:13:52 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ static void	child_process(t_pipe_ctx *ctx, int i)
 	}
 	if (apply_redirs(ctx->ast->cmdv[i].redirs) != 0)
 		exit(1);
+	close_all_heredoc_fds(ctx->ast);
 	if (ctx->ast->cmdv[i].argv && is_builtin(ctx->ast->cmdv[i].argv[0]))
 		exit(run_builtin(ctx->ast->cmdv[i].argv, ctx->env, 0));
 	execute_external_cmd(&ctx->ast->cmdv[i], ctx->env);

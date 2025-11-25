@@ -6,7 +6,7 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 23:41:05 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/24 12:25:19 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/25 14:43:04 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,6 +185,7 @@ int			read_heredoc_input(const char *delim, int hdoc_fd_writen,
 void		cleanup_opened_heredocs(t_ast *ast, int up_to_cmd);
 int			prepare_heredocs_one_cmd(t_redir *r, t_env_entry *env);
 int			handle_one_heredoc(t_redir *r, t_env_entry *env);
+void		close_all_heredoc_fds(t_ast *ast);
 
 /* ===== Builtins ===== */
 

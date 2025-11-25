@@ -6,7 +6,7 @@
 /*   By: gwindey <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/21 15:47:40 by gwindey           #+#    #+#             */
-/*   Updated: 2025/11/21 15:47:59 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/25 14:41:53 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ void	cleanup_opened_heredocs(t_ast *ast, int up_to_cmd)
 	t_redir	*r;
 
 	i = 0;
-	while (i < up_to_cmd)
+	while (i <= up_to_cmd)
 	{
 		r = ast->cmdv[i].redirs;
 		while (r)
@@ -49,4 +49,29 @@ int	prepare_heredocs_one_cmd(t_redir *r, t_env_entry *env)
 		r = r->next;
 	}
 	return (1);
+}
+
+// Sluit alle heredoc fd's (voor gebruik in child processen)
+void	close_all_heredoc_fds(t_ast *ast)
+{
+	int		i;
+	t_redir	*r;
+
+	if (!ast || !ast->cmdv)
+		return ;
+	i = 0;
+	while (i < ast->ncmd)
+	{
+		r = ast->cmdv[i].redirs;
+		while (r)
+		{
+			if (r->type == R_HEREDOC && r->hdoc_fd >= 0)
+			{
+				close(r->hdoc_fd);
+				r->hdoc_fd = -1;
+			}
+			r = r->next;
+		}
+		i++;
+	}
 }
