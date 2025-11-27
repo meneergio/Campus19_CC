@@ -6,14 +6,14 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 23:10:39 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/18 15:26:38 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/27 15:59:40 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include "libft.h"
 
-// check identifier syntaxi
+// check identifier syntax
 int	is_valid_identifier(const char *str)
 {
 	int	i;
@@ -86,22 +86,22 @@ static int	export_process_args(char **argv, t_env_entry **env)
 	return (exit_code);
 }
 
-// Afhandeling van 'export' zonder argumenten, toont correcte output.
+// Afhandeling van 'export' zonder argumenten, 
+// toont alfabetisch gesorteerde output
 int	builtin_export(char **argv, t_env_entry **env)
 {
-	t_env_entry	*p;
+	t_env_entry	**arr;
+	int			count;
 
 	if (!argv[1])
 	{
-		p = *env;
-		while (p)
-		{
-			if (p->value)
-				printf("declare -x %s=\"%s\"\n", p->key, p->value);
-			else
-				printf("declare -x %s\n", p->key);
-			p = p->next;
-		}
+		count = export_count_env_entries(*env);
+		arr = export_build_env_array(*env, count);
+		if (!arr)
+			return (1);
+		export_sort_env_array(arr, count);
+		export_print_sorted_env(arr, count);
+		free(arr);
 		return (0);
 	}
 	return (export_process_args(argv, env));

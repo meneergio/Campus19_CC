@@ -6,7 +6,7 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 19:55:07 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/25 14:46:01 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/27 16:07:58 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ static int	exec_single_external(t_ast *ast, t_env_entry **env,
 int	execute_single(t_ast *ast, t_env_entry **env, int *last_status)
 {
 	if (!ast->cmdv[0].argv || !ast->cmdv[0].argv[0])
-		return (0);
+		return (handle_empty_redirect(ast->cmdv[0].redirs, last_status));
 	if (is_builtin(ast->cmdv[0].argv[0]))
 		return (exec_single_builtin(ast, env, last_status));
 	return (exec_single_external(ast, env, last_status));

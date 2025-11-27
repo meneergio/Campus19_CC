@@ -55,6 +55,7 @@ SRC := \
 	src/builtins/builtin_exit.c \
 	src/builtins/builtin_utils.c \
 	src/builtins/builtin_export.c \
+	src/builtins/builtin_export_sort.c \
 	src/builtins/builtin_unset.c \
 	src/builtins/builtin_export_assignment.c \
 	src/exec/path_resolve.c \

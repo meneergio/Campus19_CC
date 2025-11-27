@@ -6,7 +6,7 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 20:31:08 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/17 20:31:08 by dzotti           ###   ########.fr       */
+/*   Updated: 2025/11/27 16:07:08 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,33 @@ int	apply_redirs(t_redir *redirs)
 		if (res != 0)
 			return (-1);
 		r = r->next;
+	}
+	return (0);
+}
+
+// Handle lege redirect zonder commando (bijv. "> file")
+int	handle_empty_redirect(t_redir *redirs, int *last_status)
+{
+	int	orig_in;
+	int	orig_out;
+
+	if (!redirs)
+		return (0);
+	orig_in = dup(STDIN_FILENO);
+	orig_out = dup(STDOUT_FILENO);
+	if (apply_redirs(redirs) != 0)
+		*last_status = 1;
+	else
+		*last_status = 0;
+	if (orig_in != -1)
+	{
+		dup2(orig_in, STDIN_FILENO);
+		close(orig_in);
+	}
+	if (orig_out != -1)
+	{
+		dup2(orig_out, STDOUT_FILENO);
+		close(orig_out);
 	}
 	return (0);
 }

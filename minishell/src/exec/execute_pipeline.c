@@ -6,7 +6,7 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 20:05:19 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/25 15:13:52 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/27 15:40:15 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,13 +63,12 @@ static void	child_process(t_pipe_ctx *ctx, int i)
 	exit(127);
 }
 
-// Forkt alle children en zet ze in dezelfde process group
+// Forkt alle children
 static int	spawn_children(t_pipe_ctx *ctx)
 {
 	int	i;
 
 	i = 0;
-	ctx->first_pgid = 0;
 	while (i < ctx->ast->ncmd)
 	{
 		ctx->pids[i] = fork();
@@ -82,7 +81,6 @@ static int	spawn_children(t_pipe_ctx *ctx)
 		}
 		if (ctx->pids[i] == 0)
 			child_process(ctx, i);
-		set_child_pgid(ctx->pids[i], &ctx->first_pgid, i);
 		i++;
 	}
 	return (0);
@@ -93,14 +91,10 @@ static void	wait_and_cleanup(t_pipe_ctx *ctx)
 {
 	int		i;
 	int		status;
-	void	(*old_ttou)(int);
 
 	close_all_pipes(ctx->ast->ncmd - 1, ctx->pipes);
 	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_IGN);
-	old_ttou = signal(SIGTTOU, SIG_IGN);
-	if (ctx->first_pgid != 0)
-		tcsetpgrp(STDIN_FILENO, ctx->first_pgid);
 	i = 0;
 	while (i < ctx->ast->ncmd)
 	{
@@ -110,8 +104,6 @@ static void	wait_and_cleanup(t_pipe_ctx *ctx)
 		i++;
 	}
 	fflush(stdout);
-	tcsetpgrp(STDIN_FILENO, ctx->shell_pgid);
-	signal(SIGTTOU, old_ttou);
 	setup_prompt_signal_handlers();
 }
 
@@ -132,7 +124,6 @@ int	execute_pipeline(t_ast *ast, t_env_entry **env, int *last_status)
 	}
 	if (open_pipes(&ctx) != 0)
 		return (free_pipe_data(ctx.pipes, ctx.pids));
-	ctx.shell_pgid = getpgrp();
 	if (spawn_children(&ctx) != 0)
 		return (free_pipe_data(ctx.pipes, ctx.pids));
 	wait_and_cleanup(&ctx);

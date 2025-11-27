@@ -6,7 +6,7 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 23:41:05 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/25 14:43:04 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/27 16:10:25 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ typedef struct s_token
 	t_toktype		type;
 	char			*value;
 	int				no_expand;
+	int				had_any_quotes;
 	struct s_token	*next;
 }	t_token;
 
@@ -62,6 +63,7 @@ typedef struct s_lexflags
 {
 	int	saw_squote;
 	int	mixed;
+	int	had_quotes;
 }	t_lexflags;
 
 typedef struct s_expword
@@ -87,6 +89,7 @@ typedef struct s_redir
 	t_rtype			type;
 	char			*arg;
 	int				hdoc_fd;
+	int				no_expand;
 	struct s_redir	*next;
 }	t_redir;
 
@@ -118,8 +121,6 @@ typedef struct s_pipe_ctx
 	int			(*pipes)[2];
 	pid_t		*pids;
 	int			*last_status;
-	pid_t		first_pgid;
-	pid_t		shell_pgid;
 }	t_pipe_ctx;
 
 /* ===== Main / status / line- en bufferverwerking ===== */
@@ -181,7 +182,7 @@ int			parser_check_pipe_syntax(t_token *tok);
 
 int			prepare_heredocs(t_ast *ast, t_env_entry *env, int last_status);
 int			read_heredoc_input(const char *delim, int hdoc_fd_writen,
-				t_env_entry *env);
+				t_env_entry *env, int no_expand);
 void		cleanup_opened_heredocs(t_ast *ast, int up_to_cmd);
 int			prepare_heredocs_one_cmd(t_redir *r, t_env_entry *env);
 int			handle_one_heredoc(t_redir *r, t_env_entry *env);
@@ -206,12 +207,19 @@ int			handle_export_assignment(char *arg, t_env_entry **env);
 int			is_valid_identifier(const char *str);
 void		print_export_error(const char *identifier);
 
+/* export sort helpers */
+void		export_sort_env_array(t_env_entry **arr, int count);
+void		export_print_sorted_env(t_env_entry **arr, int count);
+int			export_count_env_entries(t_env_entry *env);
+t_env_entry	**export_build_env_array(t_env_entry *env, int count);
+
 /* ===== Executor ===== */
 
 char		*resolve_cmd_path(const char *cmd, t_env_entry *env);
 char		**build_envp(t_env_entry *env);
 void		free_envp(char **envp);
 int			apply_redirs(t_redir *redirs);
+int			handle_empty_redirect(t_redir *redirs, int *last_status);
 
 void		handle_child_status(int status, int *last_status);
 int			execute_single(t_ast *ast, t_env_entry **env, int *last_status);
@@ -222,7 +230,6 @@ void		execute_external_cmd(t_command_data *cmd, t_env_entry **env);
 /* pipeline utils (execute_pipeline_utils.c) */
 void		close_all_pipes(int count, int (*pipes)[2]);
 void		wait_spawned_children(int spawned, pid_t *pids);
-void		set_child_pgid(pid_t pid, pid_t *first_pgid, int index);
 int			free_pipe_data(int (*pipes)[2], pid_t *pids);
 
 /* ===== Signals / terminal / prompt ===== */

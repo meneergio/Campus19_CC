@@ -6,7 +6,7 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/21 21:29:24 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/21 21:29:24 by dzotti           ###   ########.fr       */
+/*   Updated: 2025/11/27 15:37:38 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,20 +37,8 @@ static char	*expand_status_value(int status)
 	return (s);
 }
 
-static char	*expand_pid_value(void)
-{
-	char	*s;
-	pid_t	pid;
-
-	pid = getpid();
-	s = ft_itoa((int)pid);
-	if (!s)
-		return (ft_strdup(""));
-	return (s);
-}
-
 // zoek VALUE voor NAME(len) in onze env-lijst
-// speciale gevallen: $?  $$  $<digit>
+// speciale gevallen: $?  $<digit>
 char	*expand_lookup_value(t_env_entry *env, const char *name, int len)
 {
 	extern int	g_exit_status;
@@ -60,8 +48,6 @@ char	*expand_lookup_value(t_env_entry *env, const char *name, int len)
 		return (ft_strdup(""));
 	if (len == 1 && name[0] == '?')
 		return (expand_status_value(g_exit_status));
-	if (len == 1 && name[0] == '$')
-		return (expand_pid_value());
 	if (len == 1 && ft_isdigit((unsigned char)name[0]))
 		return (ft_strdup(""));
 	p = env;
@@ -76,7 +62,7 @@ char	*expand_lookup_value(t_env_entry *env, const char *name, int len)
 }
 
 // vind eerste $ in s die gevolgd wordt door geldige var:
-// $?  $$  $<digit>  of $IDENT
+// $?  $<digit>  of $IDENT
 int	expand_find_dollar(const char *s)
 {
 	int	i;
@@ -88,7 +74,7 @@ int	expand_find_dollar(const char *s)
 	{
 		if (s[i] == '$')
 		{
-			if (s[i + 1] == '?' || s[i + 1] == '$'
+			if (s[i + 1] == '?'
 				|| is_env_char(s[i + 1])
 				|| ft_isdigit((unsigned char)s[i + 1]))
 				return (i);

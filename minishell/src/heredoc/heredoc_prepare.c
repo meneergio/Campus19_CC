@@ -6,7 +6,7 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 14:41:07 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/26 15:22:27 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/27 15:41:44 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@ static int	heredoc_wait_and_cleanup(pid_t pid, int read_fd, t_redir *r)
 	signal(SIGINT, SIG_IGN);
 	waitpid(pid, &status, 0);
 	terminal_restore_control_chars();
-	tcflush(STDIN_FILENO, TCIFLUSH);
 	setup_prompt_signal_handlers();
 	if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT)
 	{
