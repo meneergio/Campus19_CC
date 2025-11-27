@@ -6,7 +6,7 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/31 16:50:56 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/12 16:16:57 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/26 16:36:30 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ t_token	*token_new(t_toktype type, char *value)
 	t->value = value;
 	t->next = NULL;
 	t->no_expand = 0;
+	t->had_any_quotes = 0;
 	return (t);
 }
 
@@ -63,12 +64,10 @@ t_token	*lex_line(const char *line)
 	t_token		head;
 	t_token		*tail;
 	t_token		*new;
-	t_toktype	last_type;
 	int			i;
 
 	head.next = NULL;
 	tail = &head;
-	last_type = -1;
 	i = 0;
 	while (line && line[i])
 	{
@@ -78,11 +77,8 @@ t_token	*lex_line(const char *line)
 			token_list_free(head.next);
 			return (NULL);
 		}
-		if (last_type == TOK_HEREDOC && new->type == TOK_WORD)
-			new->no_expand = 1;
 		tail->next = new;
 		tail = new;
-		last_type = new->type;
 	}
 	return (head.next);
 }

@@ -6,24 +6,13 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/31 22:37:26 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/11 17:04:47 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/26 16:37:35 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include "libft.h"
 
-// stop als spatie of operator
-static int	lexer_is_end(char c)
-{
-	if (c == '\0' || c == ' ' || c == '\t')
-		return (1);
-	if (c == '|' || c == '<' || c == '>')
-		return (1);
-	return (0);
-}
-
-// plak 2 strings aan elkaar
 static char	*str_join_free(char *base, char *add)
 {
 	char	*joined;
@@ -38,7 +27,6 @@ static char	*str_join_free(char *base, char *add)
 	return (joined);
 }
 
-// lees normaal deel tot spatie/operator/quote
 static char	*read_plain_part(const char *s, int *i)
 {
 	int		start;
@@ -58,11 +46,12 @@ static char	*read_plain_part(const char *s, int *i)
 	return (out);
 }
 
-// 1 deel toevoegen aan het woord (plain / '..' / "..")
-int	lexer_add_part(char **acc, t_lexflags *f, const char *s, int *i)
+static char	*lexer_add_quoted_part(char **acc, t_lexflags *f,
+				const char *s, int *i)
 {
 	char	*part;
 
+	f->had_quotes = 1;
 	if (s[*i] == '\'')
 	{
 		part = lexer_read_squote(s, i);
@@ -71,12 +60,22 @@ int	lexer_add_part(char **acc, t_lexflags *f, const char *s, int *i)
 		f->saw_squote = 1;
 	}
 	else
+		part = lexer_read_dquote(s, i);
+	if (f->saw_squote && s[*i - 1] == '"')
+		f->mixed = 1;
+	return (part);
+}
+
+int	lexer_add_part(char **acc, t_lexflags *f, const char *s, int *i)
+{
+	char	*part;
+
+	if (s[*i] == '\'' || s[*i] == '"')
+		part = lexer_add_quoted_part(acc, f, s, i);
+	else
 	{
-		if (s[*i] == '"')
-			part = lexer_read_dquote(s, i);
-		else
-			part = read_plain_part(s, i);
-		if (f->saw_squote)
+		part = read_plain_part(s, i);
+		if (f->saw_squote || f->had_quotes)
 			f->mixed = 1;
 	}
 	*acc = str_join_free(*acc, part);
@@ -85,7 +84,6 @@ int	lexer_add_part(char **acc, t_lexflags *f, const char *s, int *i)
 	return (1);
 }
 
-// maak 1 WORD-token uit mix : plain + '..' + ".." 
 t_token	*lexer_read_word(const char *s, int *i)
 {
 	char		*acc;
@@ -97,7 +95,9 @@ t_token	*lexer_read_word(const char *s, int *i)
 		return (NULL);
 	f.saw_squote = 0;
 	f.mixed = 0;
-	while (!lexer_is_end(s[*i]))
+	f.had_quotes = 0;
+	while (s[*i] && s[*i] != ' ' && s[*i] != '\t' && s[*i] != '|'
+		&& s[*i] != '<' && s[*i] != '>')
 	{
 		if (!lexer_add_part(&acc, &f, s, i))
 			return (NULL);
@@ -107,5 +107,7 @@ t_token	*lexer_read_word(const char *s, int *i)
 		free(acc);
 	else if (f.saw_squote && !f.mixed)
 		token->no_expand = 1;
+	if (token)
+		token->had_any_quotes = f.had_quotes;
 	return (token);
 }

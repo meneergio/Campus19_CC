@@ -6,7 +6,7 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 14:41:07 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/25 14:30:11 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/26 15:22:27 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ static void	heredoc_child_process(int fds0, int fds1,
 	close_inherited_fds(fds1);
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_IGN);
-	read_heredoc_input(r->arg, fds1, env);
+	read_heredoc_input(r->arg, fds1, env, r->no_expand);
 	close(fds1);
 	exit(0);
 }

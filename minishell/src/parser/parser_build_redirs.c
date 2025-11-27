@@ -6,14 +6,14 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 22:21:27 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/10 19:14:40 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/26 16:45:34 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-// maak 1 redir-node
-static t_redir	*redir_new(t_rtype type, char *arg_owned)
+// maak 1 redir-node met no_expand flag
+static t_redir	*redir_new(t_rtype type, char *arg_owned, int no_expand)
 {
 	t_redir	*node;
 
@@ -24,6 +24,7 @@ static t_redir	*redir_new(t_rtype type, char *arg_owned)
 	node->arg = arg_owned;
 	node->next = NULL;
 	node->hdoc_fd = -1;
+	node->no_expand = no_expand;
 	return (node);
 }
 
@@ -47,7 +48,7 @@ static int	redir_consume_pending(int *pending, t_token *tok,
 		return (1);
 	if (!tok || tok->type != TOK_WORD)
 		return (0);
-	node = redir_new((t_rtype)(*pending), tok->value);
+	node = redir_new((t_rtype)(*pending), tok->value, tok->had_any_quotes);
 	if (!node)
 		return (0);
 	tok->value = NULL;

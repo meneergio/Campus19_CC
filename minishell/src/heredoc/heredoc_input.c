@@ -6,18 +6,25 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 14:40:33 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/21 16:50:03 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/26 15:21:52 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include "libft.h"
 
-// schrijf 1 heredoc-lijn met expansie
-static void	heredoc_write_one(const char *line, int fd, t_env_entry *env)
+// schrijf 1 heredoc-lijn met of zonder expansie
+static void	heredoc_write_one(const char *line, int fd,
+							t_env_entry *env, int no_expand)
 {
 	char	*expanded;
 
+	if (no_expand)
+	{
+		write(fd, line, ft_strlen(line));
+		write(fd, "\n", 1);
+		return ;
+	}
 	expanded = expand_word_all(line, env);
 	if (!expanded)
 	{
@@ -63,8 +70,9 @@ static char	*read_line_raw(void)
 	return (ft_strdup(buffer));
 }
 
-// leest alle regels voor 1 heredoc, met expansie
-int	read_heredoc_input(const char *delim, int hdoc_fd_write, t_env_entry *env)
+// leest alle regels voor 1 heredoc, met of zonder expansie
+int	read_heredoc_input(const char *delim, int hdoc_fd_write,
+					t_env_entry *env, int no_expand)
 {
 	char	*line;
 	size_t	delim_len;
@@ -85,7 +93,7 @@ int	read_heredoc_input(const char *delim, int hdoc_fd_write, t_env_entry *env)
 			free(line);
 			break ;
 		}
-		heredoc_write_one(line, hdoc_fd_write, env);
+		heredoc_write_one(line, hdoc_fd_write, env, no_expand);
 		free(line);
 	}
 	close(hdoc_fd_write);
