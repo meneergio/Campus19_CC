@@ -6,35 +6,17 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 19:55:07 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/27 16:07:58 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/28 16:58:06 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include "libft.h"
 
-extern void	setup_prompt_signal_handlers(void);
-
-// Checkt of de enige command een geldige builtin is
-static int	is_single_builtin(t_ast *ast)
-{
-	if (!ast->cmdv[0].argv)
-		return (0);
-	if (!ast->cmdv[0].argv[0])
-		return (0);
-	if (!is_builtin(ast->cmdv[0].argv[0]))
-		return (0);
-	return (1);
-}
-
-// Herstelt een eerder opgeslagen file descriptor
-static void	restore_fd(int saved_fd, int target_fd)
-{
-	if (saved_fd == -1)
-		return ;
-	dup2(saved_fd, target_fd);
-	close(saved_fd);
-}
+// Functies in execute_single_utils.c:
+int		is_single_builtin(t_ast *ast);
+void	restore_fd(int saved_fd, int target_fd);
+int		wait_and_handle_external(pid_t pid, int *last_status);
 
 // Voert een enkel builtin-commando uit in de parent (met redirs)
 static int	exec_single_builtin(t_ast *ast, t_env_entry **env, int *last_status)
@@ -71,10 +53,10 @@ static int	exec_single_external(t_ast *ast, t_env_entry **env,
 			int *last_status)
 {
 	pid_t	pid;
-	int		status;
 
 	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_IGN);
+	terminal_restore_control_chars();
 	pid = fork();
 	if (pid == -1)
 		return (1);
@@ -89,10 +71,7 @@ static int	exec_single_external(t_ast *ast, t_env_entry **env,
 		}
 		exit(1);
 	}
-	waitpid(pid, &status, 0);
-	handle_child_status(status, last_status);
-	setup_prompt_signal_handlers();
-	return (0);
+	return (wait_and_handle_external(pid, last_status));
 }
 
 // Dispatch voor één commando: builtin in parent, extern in child

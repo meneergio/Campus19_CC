@@ -6,7 +6,7 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 20:05:19 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/27 15:40:15 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/28 16:18:00 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,9 @@ static void	wait_and_cleanup(t_pipe_ctx *ctx)
 {
 	int		i;
 	int		status;
+	int		last_was_sigint;
 
+	last_was_sigint = 0;
 	close_all_pipes(ctx->ast->ncmd - 1, ctx->pipes);
 	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_IGN);
@@ -100,9 +102,15 @@ static void	wait_and_cleanup(t_pipe_ctx *ctx)
 	{
 		waitpid(ctx->pids[i], &status, 0);
 		if (i == ctx->ast->ncmd - 1)
+		{
 			handle_child_status(status, ctx->last_status);
+			if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT)
+				last_was_sigint = 1;
+		}
 		i++;
 	}
+	if (last_was_sigint)
+		write(STDOUT_FILENO, "\n", 1);
 	fflush(stdout);
 	setup_prompt_signal_handlers();
 }
@@ -124,6 +132,7 @@ int	execute_pipeline(t_ast *ast, t_env_entry **env, int *last_status)
 	}
 	if (open_pipes(&ctx) != 0)
 		return (free_pipe_data(ctx.pipes, ctx.pids));
+	terminal_restore_control_chars();
 	if (spawn_children(&ctx) != 0)
 		return (free_pipe_data(ctx.pipes, ctx.pids));
 	wait_and_cleanup(&ctx);
