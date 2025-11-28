@@ -6,7 +6,7 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 20:46:47 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/24 12:20:58 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/28 13:37:19 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,11 +49,13 @@ int	main(int argc, char **argv, char **envp)
 		line = read_prompt_line();
 		terminal_restore_control_chars();
 		if (!line)
+		{
+			write(STDOUT_FILENO, "exit\n", 5);
 			break ;
+		}
 		handle_input(line, &env_head, &last_status);
 	}
 	rl_clear_history();
 	env_free_all(env_head);
-	write(STDOUT_FILENO, "exit\n", 5);
 	return (last_status);
 }
