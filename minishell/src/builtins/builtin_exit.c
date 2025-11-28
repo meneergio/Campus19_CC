@@ -6,7 +6,7 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 16:01:58 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/24 13:27:26 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/11/28 13:57:26 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,7 @@ int	builtin_exit(char **argv, int last_status, t_env_entry *env)
 {
 	long	exit_code;
 
+	write(STDOUT_FILENO, "exit\n", 5); 
 	if (argv[1] && argv[2])
 	{
 		write(STDERR_FILENO, "minishell: exit: too many arguments\n", 35);
