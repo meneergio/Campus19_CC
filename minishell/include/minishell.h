@@ -6,7 +6,7 @@
 /*   By: dzotti <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 23:41:05 by dzotti            #+#    #+#             */
-/*   Updated: 2025/11/27 16:10:25 by gwindey          ###   ########.fr       */
+/*   Updated: 2025/12/01 16:17:05 by gwindey          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,6 @@
 # include <sys/ioctl.h>
 # include <fcntl.h>
 # include <errno.h>
-
-/* ===== Global ==== */
-extern int	g_exit_status;
 
 /* ===== Types ===== */
 
@@ -123,13 +120,21 @@ typedef struct s_pipe_ctx
 	int			*last_status;
 }	t_pipe_ctx;
 
+/* Context voor heredoc-verwerking */
+typedef struct s_heredoc_ctx
+{
+	t_env_entry	*env;
+	int			no_expand;
+	int			last_status;
+}	t_heredoc_ctx;
+
 /* ===== Main / status / line- en bufferverwerking ===== */
 
 void		update_exit_status_env(t_env_entry **env, int status);
 void		process_buffer(char *buf, t_env_entry **env_head, int *last_status);
 void		process_one_line(char *line, t_env_entry **env_head,
 				int *last_status);
-void		expand_tokens(t_token *tok, t_env_entry *env);
+void		expand_tokens(t_token *tok, t_env_entry *env, int last_status);
 
 /* ===== Env ===== */
 
@@ -155,9 +160,10 @@ t_token		*lex_line(const char *line);
 
 /* ===== Expand ===== */
 
-char		*expand_word_all(const char *s, t_env_entry *env);
+char		*expand_word_all(const char *s, t_env_entry *env, int last_status);
 const char	*expand_read_name(const char *s, int start_i, int *len);
-char		*expand_lookup_value(t_env_entry *env, const char *name, int len);
+char		*expand_lookup_value(t_env_entry *env, const char *name, int len,
+				int last_status);
 int			expand_find_dollar(const char *s);
 char		*strip_all_quotes(char *original_str);
 char		*ft_strjoin_free(char *s1, char *s2);
@@ -181,11 +187,12 @@ int			parser_check_pipe_syntax(t_token *tok);
 /* ===== Heredoc ===== */
 
 int			prepare_heredocs(t_ast *ast, t_env_entry *env, int last_status);
-int			read_heredoc_input(const char *delim, int hdoc_fd_writen,
-				t_env_entry *env, int no_expand);
+int			read_heredoc_input(const char *delim, int hdoc_fd_write,
+				t_heredoc_ctx *ctx);
 void		cleanup_opened_heredocs(t_ast *ast, int up_to_cmd);
-int			prepare_heredocs_one_cmd(t_redir *r, t_env_entry *env);
-int			handle_one_heredoc(t_redir *r, t_env_entry *env);
+int			prepare_heredocs_one_cmd(t_redir *r, t_env_entry *env,
+				int last_status);
+int			handle_one_heredoc(t_redir *r, t_env_entry *env, int last_status);
 void		close_all_heredoc_fds(t_ast *ast);
 
 /* ===== Builtins ===== */
